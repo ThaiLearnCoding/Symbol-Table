@@ -112,16 +112,13 @@ def process_command(table, command):
 
 
     if op == "INSERT" and len(args) == 2:
-        new_table = __insert(table, args[0], args[1])
-        return new_table, "success"
+        return __insert(table, args[0], args[1]), "success"
     elif op == "ASSIGN" and len(args) == 2:
         return table, __assign(table, args[0], args[1])
     elif op == "BEGIN" and not args:
-        new_table = __begin(table)
-        return new_table, None
+        return __begin(table), None
     elif op == "END" and not args:
-        new_table = __end(table)
-        return new_table, None
+        return __end(table), None
     elif op == "LOOKUP" and len(args) == 1:
         return table, __lookup(table, args[0])
     elif op == "PRINT" and not args:
