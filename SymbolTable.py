@@ -18,13 +18,13 @@ def is_string(val):
     return len(val) >= 2 and val[0] == val[-1] == "'" and val[1:-1].isalnum()
 
 def lookup_identifier(table, name):
-    return [ symbol for scope in reversed(table) for symbol in reversed(scope) if symbol.name == name ]
+    return [ (symbol, level) for (scope, level) in zip(reversed(table), reversed(range(len(table)))) for symbol in reversed(scope) if symbol.name == name ]
 
 def get_var_type(table, var):
     if is_number(var): return 'number'
     if is_string(var): return 'string'
     found = lookup_identifier(table, var)
-    if found: return found[0].typ               # Because found here is a list containing 1 symbol
+    if found: return found[0][0].typ              # Because found here is a list containing 1 symbol
     raise Undeclared(f"ASSIGN {var}")
 
 def __insert(table, name, type):
@@ -58,7 +58,14 @@ def __end(table):
     return table[:-1]
 
 ############################ ĐÃ SỬA TỪ TRÊN XUỐNG TỚI ĐÂY #############################
-# def __lookup(table, name):
+def __lookup(table, name):
+    if not is_valid_identifier(name):
+        raise InvalidInstruction(f"LOOKUP {name}")
+    if lookup_identifier(table, name):
+        found = lookup_identifier(table, name)
+        if not found:
+            raise Undeclared(f"LOOKUP {name}")
+        return f"{found[0][1]}"
 
 # def __print(table):
 
