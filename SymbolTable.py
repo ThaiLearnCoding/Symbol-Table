@@ -57,7 +57,6 @@ def __end(table):
         raise UnknownBlock()
     return table[:-1]
 
-############################ ĐÃ SỬA TỪ TRÊN XUỐNG TỚI ĐÂY #############################
 def __lookup(table, name):
     if not is_valid_identifier(name):
         raise InvalidInstruction(f"LOOKUP {name}")
@@ -67,10 +66,28 @@ def __lookup(table, name):
             raise Undeclared(f"LOOKUP {name}")
         return f"{found[0][1]}"
 
-# def __print(table):
+############################ ĐÃ SỬA TỪ TRÊN XUỐNG TỚI ĐÂY #############################
+def __print(table):
+    result = __rprint(table, [])
+    parts = result.split()
+    return " ".join(reversed(parts))
 
-# def __rprint(table):
+def __rprint(table, seen_name):
+    if(len(table) == 0):
+        return 
+    if(len(table[-1]) == 0):
+        return __rprint(table[:-1], seen_name)
+    if table[-1][-1].name in seen_name: 
+        return __rprint(table[:-1] + [table[-1][:-1]], seen_name)
 
+    new_seen_name = seen_name + [table[-1][-1].name]
+    result = f"{table[-1][-1].name}//{len(table) - 1}"
+    call_result = __rprint(table[:-1] + [table[-1][:-1]], new_seen_name)
+
+    if call_result:
+        return result + " " + call_result
+    else:
+        return result 
 
 ############################ ĐÃ SỬA TỪ DƯỚI LÊN TỚI ĐÂY #############################
 def process_command(table, command):
@@ -98,10 +115,10 @@ def process_command(table, command):
         return new_table, None
     elif op == "LOOKUP" and len(args) == 1:
         return table, __lookup(table, args[0])
-    # elif op == "PRINT" and not args:
-    #     return table, __print(table)
-    # elif op == "RPRINT" and not args:
-    #     return table, __rprint(table)
+    elif op == "PRINT" and not args:
+        return table, __print(table)
+    elif op == "RPRINT" and not args:
+        return table, __rprint(table, [])
     else:
         raise InvalidInstruction(command)
 
