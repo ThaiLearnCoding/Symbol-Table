@@ -2,6 +2,117 @@ from StaticError import *
 from Symbol import *
 from functools import *
 
+def is_valid_identifier(name):
+    return name.isidentifier() and name[0].islower()
+
+def is_valid_type(type):
+    return type in ['number', 'string']
+
+def is_number(val):
+    if val.isdigit():
+        if int(val) >= 0:
+            return True
+    return False
+
+def is_string(val):
+    return len(val) >= 2 and val[0] == val[-1] == "'" and val[1:-1].isalnum()
+
+def lookup_identifier(table, name):
+    return [ symbol for scope in reversed(table) for symbol in reversed(scope) if symbol.name == name ]
+
+def get_var_type(table, var):
+    if is_number(var): return 'number'
+    if is_string(var): return 'string'
+    found = lookup_identifier(table, var)
+    if found: return found[0].typ               # Because found here is a list containing 1 symbol
+    raise Undeclared(f"ASSIGN {var}")
+
+def __insert(table, name, type):
+    if not is_valid_identifier(name) or not is_valid_type(type):
+        raise InvalidInstruction(f"INSERT {name} {type}")
+    
+    if any(name == symbol.name for symbol in table[-1]):
+        raise Redeclared(f"INSERT {name} {type}")
+    
+    newSymbol = Symbol(name, type)
+    return table[:-1] + [table[-1] + [newSymbol]]
+
+def __assign(table, name, val):
+    if not is_valid_identifier(name) or not (is_valid_identifier(val) or is_string(val) or is_number(val)):
+        raise InvalidInstruction(f"ASSIGN {name} {val}")
+    
+    symbol_type = get_var_type(table, name)
+    val_type = get_var_type(table, val)
+
+    if symbol_type == val_type:
+        return "success"
+    else:
+        raise TypeMismatch(f"ASSIGN {name} {val}")
+        
+def __begin(table):
+    return table[0:] + [[]]
+
+def __end(table):
+    if(len(table) == 1):
+        raise UnknownBlock()
+    return table[:-1]
+
+############################ ĐÃ SỬA TỪ TRÊN XUỐNG TỚI ĐÂY #############################
+# def __lookup(table, name):
+
+# def __print(table):
+
+# def __rprint(table):
+
+
+############################ ĐÃ SỬA TỪ DƯỚI LÊN TỚI ĐÂY #############################
+def process_command(table, command):
+
+    #### From here
+    if command != command.strip() or "  " in command:
+        raise InvalidInstruction(command)
+
+    tokens = command.split(" ")
+    op = tokens[0]
+    args = tokens[1:]
+    # To here, check the correctness of the code
+
+
+    if op == "INSERT" and len(args) == 2:
+        new_table = __insert(table, args[0], args[1])
+        return new_table, "success"
+    elif op == "ASSIGN" and len(args) == 2:
+        return table, __assign(table, args[0], args[1])
+    elif op == "BEGIN" and not args:
+        new_table = __begin(table)
+        return new_table, None
+    elif op == "END" and not args:
+        new_table = __end(table)
+        return new_table, None
+    elif op == "LOOKUP" and len(args) == 1:
+        return table, __lookup(table, args[0])
+    # elif op == "PRINT" and not args:
+    #     return table, __print(table)
+    # elif op == "RPRINT" and not args:
+    #     return table, __rprint(table)
+    else:
+        raise InvalidInstruction(command)
+
+def process_all(list_of_commands):
+    def helper(table, list_out, cmds):
+        if not cmds:
+            if len(table) != 1:
+                raise UnclosedBlock(len(table) - 1)
+            return list_out
+        else:# try:
+            new_table, output = process_command(table, cmds[0])
+            new_list_out = list_out + ([output] if output else [])
+            return helper(new_table, new_list_out, cmds[1:])
+        # except StaticError as e:
+        #     raise type(e)(cmds[0])
+    return helper([[]], [], list_of_commands)
+
+
 
 def simulate(list_of_commands):
     """
@@ -13,4 +124,6 @@ def simulate(list_of_commands):
     Returns:
         list[str]: A list of return messages corresponding to each command.
     """
-    return ["success", "success"]
+
+
+    return process_all(list_of_commands)
