@@ -15,7 +15,11 @@ def is_number(val):
     return False
 
 def is_string(val):
-    return len(val) >= 2 and val[0] == val[-1] == "'" and val[1:-1].isalnum()
+    return (
+        len(val) >= 2 and
+        val[0] == val[-1] == "'" and
+        (len(val) == 2 or val[1:-1].isalnum())
+    )
 
 def lookup_identifier(table, name):
     return [ (symbol, level) for (scope, level) in zip(reversed(table), reversed(range(len(table)))) for symbol in reversed(scope) if symbol.name == name ]
@@ -25,7 +29,7 @@ def get_var_type(table, var):
     if is_string(var): return 'string'
     found = lookup_identifier(table, var)
     if found: return found[0][0].typ              # Because found here is a list containing 1 symbol
-    raise Undeclared(f"ASSIGN {var}")
+    return None
 
 def __insert(table, name, type):
     if not is_valid_identifier(name) or not is_valid_type(type):
@@ -44,6 +48,9 @@ def __assign(table, name, val):
     symbol_type = get_var_type(table, name)
     val_type = get_var_type(table, val)
 
+    if not symbol_type or not val_type:
+        raise Undeclared(f"ASSIGN {name} {val}")
+
     if symbol_type == val_type:
         return "success"
     else:
@@ -60,21 +67,23 @@ def __end(table):
 def __lookup(table, name):
     if not is_valid_identifier(name):
         raise InvalidInstruction(f"LOOKUP {name}")
-    if lookup_identifier(table, name):
-        found = lookup_identifier(table, name)
-        if not found:
-            raise Undeclared(f"LOOKUP {name}")
-        return f"{found[0][1]}"
+
+    found = lookup_identifier(table, name)
+    if not found:
+        raise Undeclared(f"LOOKUP {name}")
+    return f"{found[0][1]}"
 
 ############################ ĐÃ SỬA TỪ TRÊN XUỐNG TỚI ĐÂY #############################
 def __print(table):
     result = __rprint(table, [])
+    if result == "":
+        return result
     parts = result.split()
     return " ".join(reversed(parts))
 
 def __rprint(table, seen_name):
     if(len(table) == 0):
-        return 
+        return ""
     if(len(table[-1]) == 0):
         return __rprint(table[:-1], seen_name)
     if table[-1][-1].name in seen_name: 
@@ -84,7 +93,7 @@ def __rprint(table, seen_name):
     result = f"{table[-1][-1].name}//{len(table) - 1}"
     call_result = __rprint(table[:-1] + [table[-1][:-1]], new_seen_name)
 
-    if call_result:
+    if call_result != "":
         return result + " " + call_result
     else:
         return result 
@@ -130,7 +139,7 @@ def process_all(list_of_commands):
             return list_out
         else:# try:
             new_table, output = process_command(table, cmds[0])
-            new_list_out = list_out + ([output] if output else [])
+            new_list_out = list_out + ([output] if output else ([""] if output == "" else []))
             return helper(new_table, new_list_out, cmds[1:])
         # except StaticError as e:
         #     raise type(e)(cmds[0])
