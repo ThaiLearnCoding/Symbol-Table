@@ -22,7 +22,7 @@ class Redeclared(StaticError):
         super().__init__(f"Redeclared: {instruction}")
 
 
-class InvalidDeclaration(StaticError):
+class InvalidDeclaration(StaticError):                                  # Not use
     def __init__(self, instruction):
         super().__init__(f"InvalidDeclaration: {instruction}")
 
@@ -37,11 +37,11 @@ class UnknownBlock(StaticError):
         super().__init__("UnknownBlock")
 
 
-class Overflow(StaticError):
+class Overflow(StaticError):                                            # Not use
     def __init__(self, instruction):
         super().__init__(f"Overflow: {instruction}")
 
 
-class TypeCannotBeInferred(StaticError):
+class TypeCannotBeInferred(StaticError):                                # Not use
     def __init__(self, instruction):
         super().__init__(f"TypeCannotBeInferred: {instruction}")

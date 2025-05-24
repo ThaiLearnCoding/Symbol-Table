@@ -775,7 +775,7 @@ class TestSymbolTable(unittest.TestCase):
         input = [
             "Insert var0 number"
         ]
-        expected = ["Invalid: Insert var0 number"]
+        expected = ["Invalid: Invalid command"]
 
         self.assertTrue(TestUtils.check(input, expected, 1075))
 
@@ -807,7 +807,7 @@ class TestSymbolTable(unittest.TestCase):
         input = [
             " BEGIN"
         ]
-        expected = ["Invalid:  BEGIN"]
+        expected = ["Invalid: Invalid command"]
 
         self.assertTrue(TestUtils.check(input, expected, 1079))
 
@@ -823,7 +823,7 @@ class TestSymbolTable(unittest.TestCase):
         input = [
             ""
         ]
-        expected = ["Invalid: "]
+        expected = ["Invalid: Invalid command"]
 
         self.assertTrue(TestUtils.check(input, expected, 1081))
 
@@ -831,7 +831,7 @@ class TestSymbolTable(unittest.TestCase):
         input = [
             " "
         ]
-        expected = ["Invalid:  "]
+        expected = ["Invalid: Invalid command"]
 
         self.assertTrue(TestUtils.check(input, expected, 1082))
 
@@ -839,7 +839,7 @@ class TestSymbolTable(unittest.TestCase):
         input = [
             " a "
         ]
-        expected = ["Invalid:  a "]
+        expected = ["Invalid: Invalid command"]
 
         self.assertTrue(TestUtils.check(input, expected, 1083))
 
@@ -848,7 +848,7 @@ class TestSymbolTable(unittest.TestCase):
             "INSERT x number",
             "ASSIGn x 10"
         ]
-        expected = ["Invalid: ASSIGn x 10"]
+        expected = ["Invalid: Invalid command"]
 
         self.assertTrue(TestUtils.check(input, expected, 1084))
 

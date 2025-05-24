@@ -73,7 +73,6 @@ def __lookup(table, name):
         raise Undeclared(f"LOOKUP {name}")
     return f"{found[0][1]}"
 
-############################ ĐÃ SỬA TỪ TRÊN XUỐNG TỚI ĐÂY #############################
 def __print(table):
     result = __rprint(table, [])
     if result == "":
@@ -98,35 +97,58 @@ def __rprint(table, seen_name):
     else:
         return result 
 
-############################ ĐÃ SỬA TỪ DƯỚI LÊN TỚI ĐÂY #############################
 def process_command(table, command):
 
-    #### From here
+    # Edge cases
+    if not command or command == "" or command[0] == ' ':
+        raise InvalidInstruction("Invalid command")
+
     if command != command.strip() or "  " in command:
         raise InvalidInstruction(command)
 
+    # Get command info
     tokens = command.split(" ")
     op = tokens[0]
     args = tokens[1:]
-    # To here, check the correctness of the code
 
-
-    if op == "INSERT" and len(args) == 2:
-        return __insert(table, args[0], args[1]), "success"
-    elif op == "ASSIGN" and len(args) == 2:
-        return table, __assign(table, args[0], args[1])
-    elif op == "BEGIN" and not args:
-        return __begin(table), None
-    elif op == "END" and not args:
-        return __end(table), None
-    elif op == "LOOKUP" and len(args) == 1:
-        return table, __lookup(table, args[0])
-    elif op == "PRINT" and not args:
-        return table, __print(table)
-    elif op == "RPRINT" and not args:
-        return table, __rprint(table, [])
+    # Process each command
+    if op == "INSERT":
+        if len(args) == 2:
+            return __insert(table, args[0], args[1]), "success"
+        else:
+            raise InvalidInstruction(command)
+    elif op == "ASSIGN":
+        if len(args) == 2:
+            return table, __assign(table, args[0], args[1])
+        else:
+            raise InvalidInstruction(command)
+    elif op == "BEGIN":
+        if not args:
+            return __begin(table), None
+        else:
+            raise InvalidInstruction(command)
+    elif op == "END":
+        if not args:
+            return __end(table), None
+        else:
+            raise InvalidInstruction(command)
+    elif op == "LOOKUP":
+        if len(args) == 1:
+            return table, __lookup(table, args[0])
+        else:
+            raise InvalidInstruction(command)
+    elif op == "PRINT":
+        if not args:
+            return table, __print(table)
+        else:
+            raise InvalidInstruction(command)
+    elif op == "RPRINT":
+        if not args:
+            return table, __rprint(table, [])
+        else:
+            raise InvalidInstruction(command)
     else:
-        raise InvalidInstruction(command)
+        raise InvalidInstruction("Invalid command")
 
 def process_all(list_of_commands):
     def helper(table, list_out, cmds):
