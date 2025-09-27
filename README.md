@@ -1,3 +1,6 @@
+# Symbol-Table
+Advanced Programming Assigment - Semester 242
+
 # Symbol Table Implementation
 
 ## Project Overview 📄
